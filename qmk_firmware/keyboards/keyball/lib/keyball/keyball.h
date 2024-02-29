@@ -124,7 +124,7 @@ typedef struct {
     uint8_t  scroll_div;
 
     uint32_t scroll_snap_last;
-    int8_t   scroll_snap_tension_h;
+    keyball_motion_t scroll_snap_tension;
 
     uint16_t       last_kc;
     keypos_t       last_pos;

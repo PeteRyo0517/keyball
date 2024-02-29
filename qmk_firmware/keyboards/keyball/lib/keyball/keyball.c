@@ -155,6 +155,10 @@ static void motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is
     m->y = 0;
 }
 
+static inline int16_t abs16(int16_t v) {
+    return v < 0 ? -v : v;
+}
+
 static void motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
     // consume motion of trackball.
     uint8_t div = keyball_get_scroll_div() - 1;
@@ -181,14 +185,19 @@ static void motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool 
 #if KEYBALL_SCROLLSNAP_ENABLE
     // scroll snap.
     uint32_t now = timer_read32();
-    if (r->h != 0 || r->v != 0) {
+    if (x != 0 || y != 0) {
         keyball.scroll_snap_last = now;
     } else if (TIMER_DIFF_32(now, keyball.scroll_snap_last) >= KEYBALL_SCROLLSNAP_RESET_TIMER) {
-        keyball.scroll_snap_tension_h = 0;
+        keyball.scroll_snap_tension.x = 0;
+        keyball.scroll_snap_tension.y = 0;
     }
-    if (abs(keyball.scroll_snap_tension_h) < KEYBALL_SCROLLSNAP_TENSION_THRESHOLD) {
-        keyball.scroll_snap_tension_h += y;
-        r->h = 0;
+    if (abs16(keyball.scroll_snap_tension.x) < KEYBALL_SCROLLSNAP_TENSION_THRESHOLD) {
+        keyball.scroll_snap_tension.x += x;
+        x = 0;
+    }
+    if (abs16(keyball.scroll_snap_tension.y) < KEYBALL_SCROLLSNAP_TENSION_THRESHOLD) {
+        keyball.scroll_snap_tension.y += y;
+        y = 0;
     }
 #endif
 }
